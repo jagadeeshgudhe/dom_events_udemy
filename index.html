@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JavaScript Topics Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #box {
+      width: 100px;
+      height: 100px;
+      background-color: gray;
+      margin: 10px 0;
+      transition: background-color 0.5s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      border-radius: 8px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      position: relative;
+      width: 80%;
+      max-width: 300px;
+      text-align: center;
+    }
+    .close-btn {
+      position: absolute;
+      top: 5px; right: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #aaa;
+    }
+    .close-btn:hover {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>DOM and EVENTS</h1>
+
+  <!-- DOM Manipulation -->
+  <p id="greeting">Hello, World!</p>
+  <button id="change-greeting">Change Greeting</button>
+
+  <!-- Selecting and Manipulating Elements -->
+  <div id="box">Box</div>
+  <button id="change-box">Change Box</button>
+
+  <!-- Handling Click Events -->
+  <button id="alert-btn">Show Alert</button>
+
+  <!-- Game Logic -->
+  <p>Score: <span id="score">0</span></p>
+  <button id="increase-score">Increase Score</button>
+
+  <!-- Highscores -->
+  <input type="number" id="new-score" placeholder="Enter Score">
+  <button id="save-score">Save Score</button>
+  <ul id="highscores"></ul>
+
+  <!-- DRY Principle & Classes -->
+  <button id="greet-john">Greet Jagadeesh</button>
+  <button id="greet-jane">Greet Harish</button>
+
+  <button id="create-player">Create Player</button>
+  <div id="player-info"></div>
+
+  <!-- Modal for Highscores -->
+  <button id="open-modal">View Highscores</button>
+  <div id="highscores-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-modal">&times;</span>
+      <h2>Highscores</h2>
+      <ol id="modal-highscores-list"></ol>
+    </div>
+  </div>
+
+  <script>
+    // 1. The DOM and DOM Manipulation
+    document.getElementById('change-greeting').addEventListener('click', () => {
+      document.getElementById('greeting').textContent = 'Hello, Brother!';
+    });
+
+    // 2. Selecting and Manipulating Elements
+    document.getElementById('change-box').addEventListener('click', () => {
+      const box = document.getElementById('box');
+      box.style.backgroundColor = getRandomColor();
+      box.textContent = 'Changed!';
+    });
+
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    // 3. Handling Click Events
+    document.getElementById('alert-btn').addEventListener('click', () => {
+      alert('Button was clicked!');
+    });
+
+    // 4. Implementing the Game Logic
+    let score = 0;
+    document.getElementById('increase-score').addEventListener('click', () => {
+      score += 1;
+      document.getElementById('score').textContent = score;
+    });
+
+    // 5. Manipulating CSS Styles
+    document.getElementById('change-box').addEventListener('click', () => {
+      const box = document.getElementById('box');
+      box.style.transform = box.style.transform === 'scale(1.5)' ? 'scale(1)' : 'scale(1.5)';
+    });
+
+    // 6. Implementing Highscores
+    const highscores = JSON.parse(localStorage.getItem('highscores')) || [];
+
+    document.getElementById('save-score').addEventListener('click', () => {
+      const newScore = parseInt(document.getElementById('new-score').value);
+      if (!isNaN(newScore)) {
+        highscores.push(newScore);
+        highscores.sort((a, b) => b - a);
+        localStorage.setItem('highscores', JSON.stringify(highscores.slice(0,5)));
+        displayHighscores();
+        document.getElementById('new-score').value = '';
+      }
+    });
+
+    function displayHighscores() {
+      const list = document.getElementById('highscores');
+      list.innerHTML = '';
+      highscores.slice(0,5).forEach(score => {
+        const li = document.createElement('li');
+        li.textContent = score;
+        list.appendChild(li);
+      });
+    }
+
+    // Display highscores on load
+    window.onload = displayHighscores;
+
+    // 7. Refactoring Our Code: The DRY Principle
+    function greet(name) {
+      alert(`Hello, ${name}!`);
+    }
+
+    document.getElementById('greet-john').addEventListener('click', () => greet('Jagadeesh'));
+    document.getElementById('greet-jane').addEventListener('click', () => greet('Harish'));
+
+    // 8. Working With Classes
+    class Player {
+      constructor(name, score) {
+        this.name = name;
+        this.score = score;
+      }
+
+      display() {
+        document.getElementById('player-info').textContent = `${this.name} scored ${this.score}`;
+      }
+    }
+
+    document.getElementById('create-player').addEventListener('click', () => {
+      const player = new Player('Alice', 100);
+      player.display();
+    });
+
+    // 9. Handling an "Esc" Keypress Event
+    const modal = document.getElementById('highscores-modal');
+    const openModalBtn = document.getElementById('open-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+
+    openModalBtn.addEventListener('click', () => {
+      displayModalHighscores();
+      modal.style.display = 'flex';
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        modal.style.display = 'none';
+      }
+    });
+
+    function displayModalHighscores() {
+      const list = document.getElementById('modal-highscores-list');
+      list.innerHTML = '';
+      highscores.slice(0,5).forEach(score => {
+        const li = document.createElement('li');
+        li.textContent = score;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
